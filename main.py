@@ -1,27 +1,15 @@
-import logging
+import os
 from pyrogram import Client, filters
-from config import API_ID, API_HASH, SESSION, BOT_USERNAME
-from uploader import upload_to_filepress
-
-logging.basicConfig(level=logging.INFO)
 
 app = Client(
-    name="filepress_bot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    session_string=SESSION,
+    "filepress",
+    api_id=int(os.environ["API_ID"]),
+    api_hash=os.environ["API_HASH"],
+    bot_token=os.environ["BOT_TOKEN"]
 )
 
-@app.on_message(filters.private & filters.document)
-async def handle_file(client, message):
-    downloading_msg = await message.reply("⬇️ Downloading file...")
-    file_path = await message.download()
-    await downloading_msg.edit("⬆️ Uploading to FilePress...")
-
-    try:
-        link = upload_to_filepress(file_path)
-        await downloading_msg.edit(f"✅ Uploaded:\n{link}")
-    except Exception as e:
-        await downloading_msg.edit(f"❌ Upload failed:\n`{e}`")
+@app.on_message(filters.command("start"))
+async def start(client, message):
+    await message.reply("Hi, I'm your FilePress bot!")
 
 app.run()
